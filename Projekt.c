@@ -1,49 +1,77 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-typedef struct zaznam{
-  int hodnota;
+
+const double vacsia_odmena = 2.2;
+const double mensia_odmena = 1.5;
+const int struktura_polozky = 6;
+const int dni_roka = 9999;
+const int velkost_spz = 7;
+const int a_medzera = 2;
+const int b_medzera = 5;
+
+typedef struct zaznam
+{
+  int poradie;
   char meno[52];
   char spz[9];
   int stav;
   double cena;
   int datum;
-  struct zaznam *dalsi;
+  struct zaznam * dalsi;
 } zaznam;
-void vypis(zaznam ** p_zaznam, int * n, int * s)
+
+void novy(zaznam ** p_zaznam, int * pocet)
 {
   FILE *fr;
   zaznam * p_akt;
-  int c = 0, i, stav, datum;
+  int c_zaznamu, pismeno, stav, datum;
   char meno[52], spz[9];
   double cena;
-  fr = fopen("predaj.txt","r");
-  while((c = getc(fr)) != EOF){
-    if(c == '\n')
-    ++*n;}
-  (*p_zaznam) = (zaznam *) malloc(sizeof(zaznam));
-  *n = (*n + 1) / 6;
+  
+  fr = fopen("predaj.txt", "r");
+  while((pismeno = getc(fr)) != EOF)
+    if(pismeno == '\n')
+      ++*pocet;
+  ++*pocet;
+  *pocet /= struktura_polozky;
+  
+  *p_zaznam = (zaznam *) malloc(sizeof(zaznam));
+  p_akt = *p_zaznam;
   rewind(fr);
-  p_akt = * p_zaznam;
-  for(i = 1; i <= *n; i++){
+  
+  for(c_zaznamu = 1; c_zaznamu <= *pocet; c_zaznamu++)
+  {
     fgets(meno, 52, fr);
     fgets(spz, 9, fr);
     fscanf(fr, "%d\n%lf\n%d\n", &stav, &cena, &datum);
-    p_akt->hodnota = i;
+
+    p_akt->poradie = c_zaznamu;
     strcpy(p_akt->meno, meno);
     strcpy(p_akt->spz, spz);
     p_akt->stav = stav;
     p_akt->cena = cena;
     p_akt->datum = datum;
-    if(i == *n)
+    
+    if(c_zaznamu == *pocet)
       break;
+    
     p_akt->dalsi = (zaznam *) malloc(sizeof(zaznam));
     p_akt = p_akt->dalsi;
   }
   fclose(fr);
+  return;
+}
+
+void vypis(zaznam ** p_zaznam, int * pocet)
+{
+  zaznam * p_akt;
   p_akt = *p_zaznam;
-  for(i = 1; i <= *n; i++){
-    printf("%d.\n", p_akt->hodnota);
+  int c_zaznamu;
+  
+  for(c_zaznamu = 1; c_zaznamu <= *pocet; c_zaznamu++)
+  {
+    printf("%d.\n", p_akt->poradie);
     printf("meno a priezvisko: %s", p_akt->meno);
     printf("spz: %s", p_akt->spz);
     printf("typ auta: %d", p_akt->stav);
@@ -51,56 +79,70 @@ void vypis(zaznam ** p_zaznam, int * n, int * s)
     printf("\ndatum: %d\n", p_akt->datum);
     p_akt = p_akt->dalsi;
   }
-return;
-}
-
-void odmeny(zaznam ** p_zaznam, int * n, int * s)
-{
-  int i, a =0, rok;
-  zaznam *p_akt;
-  p_akt = *p_zaznam;
-  scanf("%d", &rok);
-  p_akt = *p_zaznam;
-  for(i = 1; i <= *n; i++){
-    if(rok - p_akt->datum > 9999){
-      printf("%d.\n", ++a);
-      printf("meno a priezvisko: %s", p_akt->meno);
-      printf("spz: %s", p_akt->spz);
-      if(p_akt->stav == 1)
-        printf("odmena: %.2lf\n", (1.5 * p_akt->cena) / 100);
-      else
-        printf("odmena: %.2lf\n", (2.2 * p_akt->cena) / 100);
-    }
-    p_akt = p_akt->dalsi;}
   return;
 }
 
-void vypisspz(zaznam ** p_zaznam, int * n, int * s)
+void odmeny(zaznam ** p_zaznam, int * pocet)
 {
-  int i, ii;
   zaznam *p_akt;
   p_akt = *p_zaznam;
-  for(i = 1; i <= *n; i++){
-    for(ii = 0; ii <= 7; ii++){
-      if(ii == 2 || ii == 5)
-      printf(" ");
-      printf("%c", (p_akt->spz)[ii]);}
-    p_akt = p_akt->dalsi;}
- return;
+  int rok, c_zaznamu, p_cislo = 0;
+  
+  scanf("%d", &rok);
+  
+  for(c_zaznamu = 1; c_zaznamu <= *pocet; c_zaznamu++)
+  {
+    if(rok - p_akt->datum > dni_roka)
+    {
+      printf("%d.\n", ++p_cislo);
+      printf("meno a priezvisko: %s", p_akt->meno);
+      printf("spz: %s", p_akt->spz);
+      if(p_akt->stav == 1)
+        printf("odmena: %.2lf\n", (mensia_odmena * p_akt->cena) / 100);
+      else
+        printf("odmena: %.2lf\n", (vacsia_odmena * p_akt->cena) / 100);
+    }
+    p_akt = p_akt->dalsi;
+  }
+  return;
 }
-int main(){
+
+void vypisspz(zaznam ** p_zaznam, int * pocet)
+{
+  zaznam *p_akt;
+  p_akt = *p_zaznam;
+  int c_zaznamu, pismeno;
+  
+  for(c_zaznamu = 1; c_zaznamu <= *pocet; c_zaznamu++)
+  {
+    for(pismeno = 0; pismeno <= velkost_spz; pismeno++)
+    {
+      if(pismeno == a_medzera || pismeno == b_medzera)
+        printf(" ");
+      printf("%c", p_akt->spz[pismeno]);
+    }
+    p_akt = p_akt->dalsi;
+  }
+  return;
+}
+
+int main()
+{
   zaznam *p_zaznam, *p_akt;
+  int *pocet, hpocet = 0;
   char vstup;
-  int k = 0, kk = 0, *s, *n;
-  s = &k;
-  n = &kk;
-  while(vstup != 'k'){
+  
+  pocet = &hpocet;
+  
+  while(vstup != 'k')
+  {
     scanf("%c", &vstup);
     switch(vstup)
     {
-      case 'v' :vypis(&p_zaznam, n, s);    break;
-      case 'o' :odmeny(&p_zaznam, n, s);   break;
-      case 's' :vypisspz(&p_zaznam, n, s); break;
+      case 'n' : novy(&p_zaznam, pocet);     break;
+      case 'v' : vypis(&p_zaznam, pocet);    break;
+      case 'o' : odmeny(&p_zaznam, pocet);   break;
+      case 's' : vypisspz(&p_zaznam, pocet); break;
     }
   }
   return 0;
