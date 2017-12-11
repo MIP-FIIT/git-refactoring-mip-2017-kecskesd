@@ -29,14 +29,24 @@ void novy(zaznam ** p_zaznam, int * pocet)
   char meno[52], spz[9];
   double cena;
   
-  fr = fopen("predaj.txt", "r");
+  if((fr = fopen("predaj.txt", "r")) == NULL)
+  {
+    printf("Subor sa nenasiel\n");
+    return;
+  }
+  
   while((pismeno = getc(fr)) != EOF)
     if(pismeno == '\n')
       ++*pocet;
   ++*pocet;
   *pocet /= struktura_polozky;
   
-  *p_zaznam = (zaznam *) malloc(sizeof(zaznam));
+  if((*p_zaznam = (zaznam *) malloc(sizeof(zaznam))) == NULL)
+  {
+    printf("Chyba v pamati.\n");
+    return;
+  }
+  
   p_akt = *p_zaznam;
   rewind(fr);
   
@@ -56,15 +66,27 @@ void novy(zaznam ** p_zaznam, int * pocet)
     if(c_zaznamu == *pocet)
       break;
     
-    p_akt->dalsi = (zaznam *) malloc(sizeof(zaznam));
+    if((p_akt->dalsi = (zaznam *) malloc(sizeof(zaznam))) == NULL)
+    {
+      printf("Chyba v pamati.\n");
+      return;
+    }
+    
     p_akt = p_akt->dalsi;
   }
+  printf("Zoznam inicializovany.\n");
   fclose(fr);
   return;
 }
 
 void vypis(zaznam ** p_zaznam, int * pocet)
 {
+  if(*p_zaznam == NULL)
+  {
+    printf("Zoznam neinicializovany.\n");
+    return;
+  }
+  
   zaznam * p_akt;
   p_akt = *p_zaznam;
   int c_zaznamu;
@@ -84,6 +106,12 @@ void vypis(zaznam ** p_zaznam, int * pocet)
 
 void odmeny(zaznam ** p_zaznam, int * pocet)
 {
+  if(*p_zaznam == NULL)
+  {
+    printf("Zoznam neinicializovany.\n");
+    return;
+  }
+  
   zaznam *p_akt;
   p_akt = *p_zaznam;
   int rok, c_zaznamu, p_cislo = 0;
@@ -109,6 +137,12 @@ void odmeny(zaznam ** p_zaznam, int * pocet)
 
 void vypisspz(zaznam ** p_zaznam, int * pocet)
 {
+  if(*p_zaznam == NULL)
+  {
+    printf("Zoznam neinicializovany.\n");
+    return;
+  }
+  
   zaznam *p_akt;
   p_akt = *p_zaznam;
   int c_zaznamu, pismeno;
