@@ -1,137 +1,107 @@
 #include <stdio.h>
 #include <stdlib.h>
-int vypis(){
-  int c=0, i;
+#include <string.h>
+typedef struct zaznam{
+  int hodnota;
+  char meno[52];
+  char spz[9];
+  int stav;
+  double cena;
+  int datum;
+  struct zaznam *dalsi;
+} zaznam;
+void vypis(zaznam ** p_zaznam, int * n, int * s)
+{
   FILE *fr;
-  if((fr=fopen("predaj.txt","r")) == NULL){
-    printf("Neotvoreny subor\n");
-    return 0;}
-  fseek(fr,0,SEEK_END);
-  if(ftell(fr)==0)
-  return 0;
-  fseek(fr,0,SEEK_SET);
-  while(c != EOF){
-    printf("meno priezvisko: ");
-    while((c=getc(fr)) != '\n')
-    putchar(c);
-    printf("\nSPZ: ");
-    while((c=getc(fr)) != '\n')
-    putchar(c);
-    printf("\ntyp auta: ");
-    while((c=getc(fr)) != '\n')
-    putchar(c);
-    printf("\ncena: ");
-    while((c=getc(fr)) != '\n')
-    putchar(c);
-    printf("\ndatum: ");
-    while((c=getc(fr)) != '\n')
-    putchar(c);
-    printf("\n\n");
-    c=getc(fr);}
-  fclose(fr);
-return 1;
-}
-int odmeny(int fa){
-  FILE *fr;
-  double cena, odmena;
-  int c=0, x, i, ii, rok, dni;
-  if((fa==0) || (fr=fopen("predaj.txt","r")) == NULL)
-    return 0;
-  scanf("%d", &rok);
-  while(c != EOF){
-    x=-18;
-    for(i=0;i<4;i++)
-      while ((c=getc(fr)) != '\n')
-      --x;
-    fscanf(fr,"%d",&dni);
-    c = getc(fr);
-    if((rok-dni) > 9999){
-      fseek(fr,x,SEEK_CUR);
-      while((c=getc(fr)) != '\n')
-      putchar(c);
-      printf(" ");
-      while((c=getc(fr)) != '\n')
-      putchar(c);
-      fscanf(fr,"%d",&i);
-      c=getc(fr);
-      fscanf(fr,"%lf",&cena);
-      c=getc(fr);
-      if(i == 1)
-      odmena=(1.5*cena)/100;
-      else
-      odmena=(2.2 * cena)/100;
-      printf(" %.2lf\n", odmena);
-      while ((c=getc(fr)) != '\n');}
-    c=getc(fr);}
-    fclose(fr);
-  return 0;
-}
-int polespz(int fa, int fb, int * p, char *** xy){
-  FILE *fr;
-  int c, x, i, ii;
-  char m;
-  if((fa == 0) || (fr=fopen("predaj.txt","r")) == NULL)
-    return 0;
-  while(1){
-    for(i=0;i<5;i++)
-    while((c=getc(fr)) != '\n');
-    ++x;
-    c= getc(fr);
-    if(c ==EOF) break;}
-  if(fb == 1){
-    for (i=0; i<*p; ++i)
-      free((*xy)[i]);
-    free(*xy);}
-  *xy =(char **) malloc((x-1)*sizeof(char *));
-  for(i=0; i<x; i++)
-    (*xy)[i] = (char *) malloc(7*sizeof(char));
+  zaznam * p_akt;
+  int c = 0, i, stav, datum;
+  char meno[52], spz[9];
+  double cena;
+  fr = fopen("predaj.txt","r");
+  while((c = getc(fr)) != EOF){
+    if(c == '\n')
+    ++*n;}
+  (*p_zaznam) = (zaznam *) malloc(sizeof(zaznam));
+  *n = (*n + 1) / 6;
   rewind(fr);
-  x=0;
-  while(1){
-    while((c=getc(fr)) != '\n');
-    for(i=0; i<7; i++){
-      c=getc(fr);
-      (*xy)[x][i] = c;}
-    x++;
-    c=getc(fr);
-    for(i=0; i<3; i++)
-      while ((c = getc(fr)) != '\n');
-    c=getc(fr);
-    if(c == EOF) break;}
-  *p =x;
+  p_akt = * p_zaznam;
+  for(i = 1; i <= *n; i++){
+    fgets(meno, 52, fr);
+    fgets(spz, 9, fr);
+    fscanf(fr, "%d\n%lf\n%d\n", &stav, &cena, &datum);
+    p_akt->hodnota = i;
+    strcpy(p_akt->meno, meno);
+    strcpy(p_akt->spz, spz);
+    p_akt->stav = stav;
+    p_akt->cena = cena;
+    p_akt->datum = datum;
+    if(i == *n)
+      break;
+    p_akt->dalsi = (zaznam *) malloc(sizeof(zaznam));
+    p_akt = p_akt->dalsi;
+  }
   fclose(fr);
-  return 1;
+  p_akt = *p_zaznam;
+  for(i = 1; i <= *n; i++){
+    printf("%d.\n", p_akt->hodnota);
+    printf("meno a priezvisko: %s", p_akt->meno);
+    printf("spz: %s", p_akt->spz);
+    printf("typ auta: %d", p_akt->stav);
+    printf("\ncena: %.2lf", p_akt->cena);
+    printf("\ndatum: %d\n", p_akt->datum);
+    p_akt = p_akt->dalsi;
+  }
+return;
 }
-int vypisspz(int fb, int * p, char ** xy){
+
+void odmeny(zaznam ** p_zaznam, int * n, int * s)
+{
+  int i, a =0, rok;
+  zaznam *p_akt;
+  p_akt = *p_zaznam;
+  scanf("%d", &rok);
+  p_akt = *p_zaznam;
+  for(i = 1; i <= *n; i++){
+    if(rok - p_akt->datum > 9999){
+      printf("%d.\n", ++a);
+      printf("meno a priezvisko: %s", p_akt->meno);
+      printf("spz: %s", p_akt->spz);
+      if(p_akt->stav == 1)
+        printf("odmena: %.2lf\n", (1.5 * p_akt->cena) / 100);
+      else
+        printf("odmena: %.2lf\n", (2.2 * p_akt->cena) / 100);
+    }
+    p_akt = p_akt->dalsi;}
+  return;
+}
+
+void vypisspz(zaznam ** p_zaznam, int * n, int * s)
+{
   int i, ii;
-  if(fb == 0){
-    printf("Pole nie je vytvorene\n");
-    return 0;
-  }
-  for(ii =0; i <*p; ii++){
-    for(i=0; i<7; i++){
-      if(i==2 || i==5)
-        printf(" ");
-      printf("%c", xy[ii][i]);}
-    printf("\n");
-  }
-return 0;
+  zaznam *p_akt;
+  p_akt = *p_zaznam;
+  for(i = 1; i <= *n; i++){
+    for(ii = 0; ii <= 7; ii++){
+      if(ii == 2 || ii == 5)
+      printf(" ");
+      printf("%c", (p_akt->spz)[ii]);}
+    p_akt = p_akt->dalsi;}
+ return;
 }
 int main(){
-  int fa=0, fb=0, *p, x, i;
-  char vstup, **xy;
-  p=&x;
-  while(vstup !='k'){
+  zaznam *p_zaznam, *p_akt;
+  char vstup;
+  int k = 0, kk = 0, *s, *n;
+  s = &k;
+  n = &kk;
+  while(vstup != 'k'){
     scanf("%c", &vstup);
-    switch(vstup){
-      case 'v':fa=vypis();                 break;
-      case 'o':odmeny(fa);                 break;
-      case 'n':fb=polespz(fa, fb, p, &xy); break;
-      case 's':vypisspz(fb, p, xy);        break;
-    }}
-  if(fb == 1){
-    for (i=0; i<*p; ++i)
-      free(xy[i]);
-    free(xy);}
+    switch(vstup)
+    {
+      case 'v' :vypis(&p_zaznam, n, s);    break;
+      case 'o' :odmeny(&p_zaznam, n, s);   break;
+      case 's' :vypisspz(&p_zaznam, n, s); break;
+    }
+  }
   return 0;
 }
