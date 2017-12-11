@@ -29,18 +29,28 @@ void novy(zaznam ** p_zaznam, int * pocet)
   char meno[52], spz[9];
   double cena;
   
-  fr = fopen("predaj.txt", "r");
-  while((pismeno = getc(fr)) != EOF)
+  if((fr = fopen("predaj.txt", "r")) == NULL)
+  {
+    printf("Subor sa nenasiel\n");
+    return;
+  }
+  
+  while((pismeno = getc(fr)) != EOF)  //zisti kolko zaznamov treba vytvorit
     if(pismeno == '\n')
       ++*pocet;
   ++*pocet;
   *pocet /= struktura_polozky;
   
-  *p_zaznam = (zaznam *) malloc(sizeof(zaznam));
+  if((*p_zaznam = (zaznam *) malloc(sizeof(zaznam))) == NULL)
+  {
+    printf("Chyba v pamati.\n");
+    return;
+  }
+  
   p_akt = *p_zaznam;
   rewind(fr);
   
-  for(c_zaznamu = 1; c_zaznamu <= *pocet; c_zaznamu++)
+  for(c_zaznamu = 1; c_zaznamu <= *pocet; c_zaznamu++)  //naplnenie struktury
   {
     fgets(meno, 52, fr);
     fgets(spz, 9, fr);
@@ -56,15 +66,27 @@ void novy(zaznam ** p_zaznam, int * pocet)
     if(c_zaznamu == *pocet)
       break;
     
-    p_akt->dalsi = (zaznam *) malloc(sizeof(zaznam));
+    if((p_akt->dalsi = (zaznam *) malloc(sizeof(zaznam))) == NULL)
+    {
+      printf("Chyba v pamati.\n");
+      return;
+    }
+    
     p_akt = p_akt->dalsi;
   }
+  printf("Zoznam inicializovany.\n");
   fclose(fr);
   return;
 }
 
 void vypis(zaznam ** p_zaznam, int * pocet)
 {
+  if(*p_zaznam == NULL)
+  {
+    printf("Zoznam neinicializovany.\n");
+    return;
+  }
+  
   zaznam * p_akt;
   p_akt = *p_zaznam;
   int c_zaznamu;
@@ -84,6 +106,12 @@ void vypis(zaznam ** p_zaznam, int * pocet)
 
 void odmeny(zaznam ** p_zaznam, int * pocet)
 {
+  if(*p_zaznam == NULL)
+  {
+    printf("Zoznam neinicializovany.\n");
+    return;
+  }
+  
   zaznam *p_akt;
   p_akt = *p_zaznam;
   int rok, c_zaznamu, p_cislo = 0;
@@ -92,7 +120,7 @@ void odmeny(zaznam ** p_zaznam, int * pocet)
   
   for(c_zaznamu = 1; c_zaznamu <= *pocet; c_zaznamu++)
   {
-    if(rok - p_akt->datum > dni_roka)
+    if(rok - p_akt->datum > dni_roka)  //ak presiel rok od predaja auta, vypise odmenu
     {
       printf("%d.\n", ++p_cislo);
       printf("meno a priezvisko: %s", p_akt->meno);
@@ -109,6 +137,12 @@ void odmeny(zaznam ** p_zaznam, int * pocet)
 
 void vypisspz(zaznam ** p_zaznam, int * pocet)
 {
+  if(*p_zaznam == NULL)
+  {
+    printf("Zoznam neinicializovany.\n");
+    return;
+  }
+  
   zaznam *p_akt;
   p_akt = *p_zaznam;
   int c_zaznamu, pismeno;
@@ -117,7 +151,7 @@ void vypisspz(zaznam ** p_zaznam, int * pocet)
   {
     for(pismeno = 0; pismeno <= velkost_spz; pismeno++)
     {
-      if(pismeno == a_medzera || pismeno == b_medzera)
+      if(pismeno == a_medzera || pismeno == b_medzera)  //doplnenie medzier, aby bola SPZ v pozadovanom tvare
         printf(" ");
       printf("%c", p_akt->spz[pismeno]);
     }
