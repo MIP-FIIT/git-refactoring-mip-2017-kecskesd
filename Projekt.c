@@ -102,6 +102,19 @@ int polespz(int fa, int fb, int * p, char *** xy){
   fclose(fr);
   return 1;
 }
+int vypisspz(int fb, int * p, char ** xy){
+  int i, ii;
+  if(fb == 0){
+    printf("Pole nie je vytvorene\n");
+    return 0;
+  }
+  for(ii =0; i <*p; ii++){
+    for(i=0; i<7; i++){
+      if(i==2 || i==5)
+        printf(" ");
+      printf("%c", xy[ii][i]);}
+    printf("\n");
+  }
 return 0;
 }
 int main(){
